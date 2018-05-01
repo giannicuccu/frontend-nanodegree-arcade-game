@@ -38,7 +38,8 @@ var Engine = (function(global) {
          * would be the same for everyone (regardless of how fast their
          * computer is) - hurray time!
          */
-        var now = Date.now(),
+        var now = Date.now();
+        //console.log(now);
             dt = (now - lastTime) / 1000.0;
 
         /* Call our update/render functions, pass along the time delta to
@@ -56,6 +57,10 @@ var Engine = (function(global) {
          * function again as soon as the browser is able to draw another frame.
          */
         win.requestAnimationFrame(main);
+        // setInterval(function(){
+        //     main();
+        //     console.log(dt)
+        // },2000);
     }
 
     /* This function does some initial setup that should only occur once,
@@ -162,6 +167,7 @@ var Engine = (function(global) {
      */
     function reset() {
         // noop
+        console.log('reset');
     }
 
     /* Go ahead and load all of the images we know we're going to need to
@@ -172,7 +178,7 @@ var Engine = (function(global) {
         'images/stone-block.png',
         'images/water-block.png',
         'images/grass-block.png',
-        'images/enemy-bug.png',
+        'images/enemy-bug-2.png',
         'images/char-boy.png'
     ]);
     Resources.onReady(init);
@@ -182,4 +188,5 @@ var Engine = (function(global) {
      * from within their app.js files.
      */
     global.ctx = ctx;
+    global.reset = reset;
 })(this);
