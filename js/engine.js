@@ -22,7 +22,8 @@ var Engine = (function(global) {
         win = global.window,
         canvas = doc.createElement('canvas'),
         ctx = canvas.getContext('2d'),
-        lastTime;
+        lastTime,
+        animation;
 
     canvas.width = 505;
     canvas.height = 606;
@@ -56,7 +57,8 @@ var Engine = (function(global) {
         /* Use the browser's requestAnimationFrame function to call this
          * function again as soon as the browser is able to draw another frame.
          */
-        win.requestAnimationFrame(main);
+         animation = win.requestAnimationFrame(main);
+         global.animation = animation;
         // setInterval(function(){
         //     main();
         //     console.log(dt)
@@ -98,7 +100,7 @@ var Engine = (function(global) {
         allEnemies.forEach(function(enemy) {
             enemy.update(dt);
         });
-        player.update();
+        player.update(dt);
     }
 
     /* This function initially draws the "game level", it will then call
@@ -168,6 +170,7 @@ var Engine = (function(global) {
     function reset() {
         // noop
         console.log('reset');
+        return
     }
 
     /* Go ahead and load all of the images we know we're going to need to
@@ -189,4 +192,5 @@ var Engine = (function(global) {
      */
     global.ctx = ctx;
     global.reset = reset;
+    
 })(this);
