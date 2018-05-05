@@ -97,10 +97,16 @@ var Engine = (function(global) {
      * render methods.
      */
     function updateEntities(dt) {
+        
+        collectables.forEach(function(collectable) {
+            collectable.update(dt);
+        });
         allEnemies.forEach(function(enemy) {
             enemy.update(dt);
         });
         player.update(dt);
+        
+       
     }
 
     /* This function initially draws the "game level", it will then call
@@ -156,11 +162,18 @@ var Engine = (function(global) {
         /* Loop through all of the objects within the allEnemies array and call
          * the render function you have defined.
          */
+        collectables.forEach(function(gem) {            
+            gem.render();
+            
+        });
+        
         allEnemies.forEach(function(enemy) {
             enemy.render();
         });
 
         player.render();
+       
+        
     }
 
     /* This function does nothing but it could have been a good place to
@@ -182,7 +195,12 @@ var Engine = (function(global) {
         'images/water-block.png',
         'images/grass-block.png',
         'images/enemy-bug-2.png',
-        'images/char-boy.png'
+        'images/char-boy.png',
+        'images/Gem-Blue-small.png',
+        'images/Gem-Green-small.png',
+        'images/Gem-Orange-small.png',
+        'images/Key-small.png',
+        'images/Rock.png',
     ]);
     Resources.onReady(init);
 
