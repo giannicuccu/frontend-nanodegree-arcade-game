@@ -184,14 +184,11 @@ var Engine = (function(global) {
      * those sorts of things. It's only called once by the init() method.
      */
     function reset() {
-         console.log(gameState+"FROM RESET")
-         if (gameState === 'gameover'){
-         console.log('GAMEOVER');
-        debugger
-        
-        
-        
-        }
+        //  console.log(gameManager.gameState+" FROM RESET")
+        //  if (gameManager.gameState === 'gameover'){
+        //  console.log('GAMEOVER');
+        // debugger    
+        //}
         
         
     }

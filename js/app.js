@@ -6,22 +6,53 @@
  let allEnemies = [];
  let collectables = [];
  let maxEnemies = 3;
+ let level = 1;
 
- const GameManager = function(){     
+ const GameManager = function(){
+    
+
     this.start = function(){
-        if(gameState === 'paused'){
+        if( gameState === 'paused' || gameState === 'gameOver' ){
             firstLoad = false;
-            gameState = 'running';
             allEnemies = [];
             collectables = [];
             myEnemy = new Enemy();
-            player = new Player();    
+            gameState === 'gameOver'? player = new Player():false;    
             allEnemies.push(myEnemy);
+            gameState = 'running';
+
         }
     }
+    
+     this.gameOver = function(){
+         console.log('gameover FUNCTION');
+         sfx.gameOver.play();
+         allEnemies = [];
+         collectables = [];
+         speedlevel = 150;
+         gameState = 'gameOver';         
+         alert('GAME OVER - YOU REACHED LEVEL: '+level+' - YOUR SCORE: '+player.score)
+         level = 1;
+         winningScore = 100;
+         
+     }
+ 
+     this.win = function(){
+         //gameState = 'win';
+         console.log('WIN FUNCTION');
+         sfx.win.play();
+         allEnemies = [];
+         collectables = [];
+         player.capabilities = [];
+         gameState = 'paused';
+         winningScore += 100;
+         level++;
+         alert('LEVEL '+level)
+         this.start();
+     }
 
     this.evaluateCollectable = function(collectable){
-        console.log(collectable);
+        //console.log(collectable);
         switch (collectable.name) {
             case 'gem':
                 player.score += collectables[0].value;
@@ -46,25 +77,6 @@
         collectables = [];
     }
 
-   
-    this.gameOver = function(){
-        gameState = 'gameover';
-        sfx.gameOver.play();
-        allEnemies = [];
-        collectables = [];
-        speedlevel = 150;
-        gameState = 'paused';
-        
-    }
-
-    this.win = function(){
-        gameState = 'win';
-        console.log('WIN FUNCTION');
-        sfx.win.play();
-        allEnemies = [];
-        collectables = [];
-        gameState = 'paused';
-    }
 
     this.handleInput = function(keyCode){
        switch (keyCode) {
@@ -197,7 +209,7 @@ Enemy.prototype.restart = function() {
 
     this.number === 0 && allEnemies.length <= maxEnemies-1 ? this.addEnemy()  : false;
     
-    if(this.number === 0  && collectables.length === 0){        
+    if(this.number === 1  && collectables.length === 0){        
         if(player.score >= winningScore && !player.capabilities.includes('hasKey')){
             collectables.push(new Key())
         }else{
@@ -211,7 +223,7 @@ Enemy.prototype.addEnemy = function(){
     let delay = Math.floor(Math.random() * (4500 - 1250 + 1)) + 1250
     setTimeout(() => {
       let enemy = new Enemy();
-        allEnemies.push(enemy);   
+        gameState === 'running'? allEnemies.push(enemy): false;   
     }, delay);
 }
 
@@ -234,14 +246,18 @@ const Player = function(){
 
 Player.prototype.update = function(dt){
     
-    if(this.y < 0 && this.capabilities.includes('hasKey')){         
+    if(this.y < 0 && this.capabilities.includes('hasKey')){
+        console.log(gameState);
         this.repositioning = true;
-        gameManager.win()
-       // allEnemies.push(new Enemy());       
+        gameManager.win();
+       
     }
 
-    if(this.health === 0){
-        gameManager.gameOver();       
+    if(this.health <= 0 && gameState != 'gameOver'){
+        console.log(gameState);
+        this.repositioning = true;
+        gameManager.gameOver();
+        
     }
     
     //TODO: i need  to fix this weird animation workaround :-
@@ -265,7 +281,7 @@ Player.prototype.update = function(dt){
             //  this.score += collectables[0].value
              //collectables = [];
              gameManager.evaluateCollectable(collectables[0]);
-             console.log(this)
+             
             }
     }
 
@@ -385,6 +401,7 @@ const Collectable = function(){
 
     if(firstLoad){
         console.log(firstLoad)
+        alert('COLLECT GEMS, GET A KEY AND PUT THE KEY IN THE CHEST')
     }else{
     // let allEnemies = [];
     // let collectables = [];
@@ -410,12 +427,12 @@ const Collectable = function(){
             };
 
             var gameKeys ={
-                13:'start',
-                80:'pause'
+                13:'start'
+               
             }
 
-            console.log(allowedKeys[e.keyCode]);
-            console.log(gameKeys[e.keyCode]);
+            // console.log(allowedKeys[e.keyCode]);
+            // console.log(gameKeys[e.keyCode]);
             
             allowedKeys[e.keyCode] ? player.handleInput(allowedKeys[e.keyCode]): false;
             gameKeys[e.keyCode] ? gameManager.handleInput(gameKeys[e.keyCode]): false;
