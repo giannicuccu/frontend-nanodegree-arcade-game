@@ -1,19 +1,102 @@
  
- let speedlevel = 180;
+ let speedlevel = 150;
+ let firstLoad = true;
+ let gameState = 'paused';
+ let winningScore = 150;
+ let allEnemies = [];
+ let collectables = [];
+ let maxEnemies = 3;
 
- const GameManager = function(){ 
-    this.playerPosition = [];
-    this.enemyPositions = [];
+ const GameManager = function(){     
+    this.start = function(){
+        if(gameState === 'paused'){
+            firstLoad = false;
+            gameState = 'running';
+            allEnemies = [];
+            collectables = [];
+            myEnemy = new Enemy();
+            player = new Player();    
+            allEnemies.push(myEnemy);
+        }
+    }
+
+    this.evaluateCollectable = function(collectable){
+        console.log(collectable);
+        switch (collectable.name) {
+            case 'gem':
+                player.score += collectables[0].value;
+                sfx.pick.play();                
+            break;
+            
+            case 'key':
+                player.capabilities.push(collectables[0].power);
+                sfx.hasKey.play();
+            break
+
+            case 'heart':
+                player.health++;
+                sfx.pick.play(); 
+            break
+        
+            default:
+                break;
+        }
+        // collectables[0].power.length?( player.capabilities.push(collectables[0].power),sfx.hasKey.play()): sfx.pick.play();
+        // player.score += collectables[0].value
+        collectables = [];
+    }
+
+   
+    this.gameOver = function(){
+        gameState = 'gameover';
+        sfx.gameOver.play();
+        allEnemies = [];
+        collectables = [];
+        speedlevel = 150;
+        gameState = 'paused';
+        
+    }
+
+    this.win = function(){
+        gameState = 'win';
+        console.log('WIN FUNCTION');
+        sfx.win.play();
+        allEnemies = [];
+        collectables = [];
+        gameState = 'paused';
+    }
+
+    this.handleInput = function(keyCode){
+       switch (keyCode) {
+           case 'start':
+               this.start();
+               break;
+        //    case 'pause':
+        //        this.pause();
+        //        break;
+       
+           default:
+               break;
+       }
+
+    }
  }
 
- const Sfx = function (){
+ const gameManager = new GameManager();
+
+
+
+ const Soundfx = function (){
+     // soundFx from https://freesound.org
      this.pick =  new Audio('sfx/pick.mp3');
-     this.collision =  new Audio('sfx/toink.mp3');
+     this.collision = new Audio('sfx/toink.mp3');
      this.win = new Audio('sfx/win.mp3');
      this.buzz = new Audio('sfx/buzz.mp3');
+     this.hasKey = new Audio('sfx/haskey.mp3');
+     this.gameOver = new Audio('sfx/game-over.mp3');
      }
 
-    let sfx = new Sfx();
+    let sfx = new Soundfx();
 
     
 
@@ -44,7 +127,7 @@
         return this.randomtrack ;
        };
 
-    this.assignCol = function(min=0,max=4){
+    this.assignCol = function(min=0,max=4){        
         this.randomcol = this.columns[Math.floor(Math.random() * (max - min + 1)) + min] ;
         return this.randomcol;
    };
@@ -52,7 +135,7 @@
  }
 
 // instantiate gridmanager
-let gridManager = new GridManager();
+const gridManager = new GridManager();
 
 // Enemies our player must avoid
 var Enemy = function() {
@@ -61,20 +144,12 @@ var Enemy = function() {
 
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
-    this.speedfactor = Math.floor(Math.random() * (180 - 140 + 1)) + 140;
     this.sprite = 'images/enemy-bug-2.png';
+    this.speedfactor = Math.floor(Math.random() * (180 - 140 + 1)) + 140;
     this.number = allEnemies.length || 0;
     this.track = gridManager.assigntrack();
-    let currentTrack = this.track.trackNumber;
-    let currentNumber = this.number;
-
-    
-
     this.y = this.track.trackValue;   
-   
-
-    
-};
+    };
 
 // Update the enemy's position, required method for game
 // Parameter: dt, a time delta between ticks
@@ -86,7 +161,8 @@ Enemy.prototype.update = function(dt) {
 if (player.x+20 < this.x + 101  && 
     player.x-40 + 101  > this.x  &&
 	player.y === this.track.trackValue ) {    
-        sfx.collision.play();    
+        sfx.collision.play();
+        player.health--;    
         player.repositioning = true;
     }
 
@@ -103,11 +179,11 @@ Enemy.prototype.render = function() {
 Enemy.prototype.restart = function() { 
         
     this.track = gridManager.assigntrack();
-    this.speedfactor = ++speedlevel + Math.floor(Math.random() * (50 - 10 + 1)) + 10;
-        
+    this.y = this.track.trackValue;
+    this.speedfactor = ++speedlevel + Math.floor(Math.random() * (70 - 10 + 1)) + 10;        
+    
     let currentTrack = this.track.trackNumber;
     let currentNumber = this.number;
-
     if (allEnemies.find(function (enemy) {
         return enemy.track.trackNumber === currentTrack && enemy.number != currentNumber
     })) {
@@ -116,18 +192,23 @@ Enemy.prototype.restart = function() {
     } else { 
         this.x = -101; }
     
-    this.y = this.track.trackValue;
       
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-    this.number === 0 && allEnemies.length <= 2? (this.addEnemy())  : false;     
-     if(this.number === 0  && collectables.length == 0){
-        collectables.push(new Gem())
+
+    this.number === 0 && allEnemies.length <= maxEnemies-1 ? this.addEnemy()  : false;
+    
+    if(this.number === 0  && collectables.length === 0){        
+        if(player.score >= winningScore && !player.capabilities.includes('hasKey')){
+            collectables.push(new Key())
+        }else{
+            player.health===1? collectables.push(new Heart()):collectables.push(new Gem())
+        }
      }
      
 };
 
 Enemy.prototype.addEnemy = function(){
-    let delay = Math.floor(Math.random() * (2500 - 50 + 1)) + 50
+    let delay = Math.floor(Math.random() * (4500 - 1250 + 1)) + 1250
     setTimeout(() => {
       let enemy = new Enemy();
         allEnemies.push(enemy);   
@@ -143,6 +224,7 @@ const Player = function(){
     this.sprite = 'images/char-boy.png';
     this.x = 202;
     this.y = 400;
+    this.health = 3;
     this.speedfactor = 600;
     this.repositioning = false;
     this.score = 0;
@@ -152,12 +234,14 @@ const Player = function(){
 
 Player.prototype.update = function(dt){
     
-    if(this.y < 0 && this.capabilities.includes('hasKey')){    
-        sfx.win.play();
-        allEnemies = [];
-        collectables = [];
+    if(this.y < 0 && this.capabilities.includes('hasKey')){         
         this.repositioning = true;
+        gameManager.win()
        // allEnemies.push(new Enemy());       
+    }
+
+    if(this.health === 0){
+        gameManager.gameOver();       
     }
     
     //TODO: i need  to fix this weird animation workaround :-
@@ -177,10 +261,10 @@ Player.prototype.update = function(dt){
 
     if (this.repositioning === false && collectables.length ){
         if (this.x === collectables[0].x && this.y === collectables[0].y){
-             sfx.pick.play();
-             this.score += collectables[0].value
-             collectables[0].power.length? this.capabilities.push(collectables[0].power):false;
-             collectables = [];
+            // collectables[0].power.length?( this.capabilities.push(collectables[0].power),sfx.hasKey.play()): sfx.pick.play();
+            //  this.score += collectables[0].value
+             //collectables = [];
+             gameManager.evaluateCollectable(collectables[0]);
              console.log(this)
             }
     }
@@ -230,14 +314,14 @@ Player.prototype.handleInput = function(keyCode){
 
 
 const Collectable = function(){
+    this.track = gridManager.assigntrack(1,3);
     this.column = gridManager.assignCol();
     this.x = this.column.colValue
-    this.track = gridManager.assigntrack(2,3);
     this.y = this.track.trackValue;
     this.sprite = '' ;
     this.value = 0;
     this.power = ''; 
-    console.log(this) 
+    //console.log(this) 
     
 }
 
@@ -251,8 +335,9 @@ const Collectable = function(){
         
     const Gem = function(){
         Collectable.call(this);
+        this.name = 'gem';
         if(this.column.colNumber === 0){
-            player.score >= 250 && !player.capabilities.includes('hasKey') ? (this.sprite = 'images/Key-small.png', this.power = 'hasKey'): this.sprite = 'images/Gem-Orange-small.png' ;
+            this.sprite = 'images/Gem-Orange-small.png' ;
             this.value = 50;
         }else if(this.column.colNumber === 1 || this.column.colNumber === 2){
             this.sprite = 'images/Gem-Blue-small.png' ;
@@ -266,22 +351,56 @@ const Collectable = function(){
     
     Gem.prototype = Object.create(Collectable.prototype);
     Gem.prototype.constructor = Gem;
+
+
+    const Key = function(){
+        Collectable.call(this);
+        this.name = 'key';
+        this.column = gridManager.assignCol(0,-1);
+        this.x = this.column.colValue;
+        this.sprite = 'images/Key-small.png'; 
+        this.power = 'hasKey';
+    }
+    
+    Key.prototype = Object.create(Collectable.prototype);
+    Key.prototype.constructor = Key;
+
+    const Heart = function(){
+        Collectable.call(this);
+        this.name = 'heart';
+        this.column = gridManager.assignCol(0,-1);
+        this.x = this.column.colValue;
+        this.sprite = 'images/Heart-small.png'; 
+        this.power = 'addHealth';
+    }
+    
+    Heart.prototype = Object.create(Collectable.prototype);
+    Heart.prototype.constructor = Heart;
     
     
     // Now instantiate your objects.
     // Place all enemy objects in an array called allEnemies
     // Place the player object in a variable called player
     
-    let allEnemies = [];
-    let collectables = [];
+
+    if(firstLoad){
+        console.log(firstLoad)
+    }else{
+    // let allEnemies = [];
+    // let collectables = [];
     let myEnemy = new Enemy();
-    let player = new Player();
-    
+    let player = new Player();    
     allEnemies.push(myEnemy);
+}
+
+    // let allEnemies = [];
+    // let collectables = [];
+    let player = new Player();
         
         // This listens for key presses and sends the keys to your
         // Player.handleInput() method. You don't need to modify this.
         // changed to keydown for speed
+
         document.addEventListener('keyup', function(e) {
             var allowedKeys = {
                 37: 'left',
@@ -289,8 +408,17 @@ const Collectable = function(){
                 39: 'right',
                 40: 'down'
             };
+
+            var gameKeys ={
+                13:'start',
+                80:'pause'
+            }
+
+            console.log(allowedKeys[e.keyCode]);
+            console.log(gameKeys[e.keyCode]);
             
-            player.handleInput(allowedKeys[e.keyCode]);
+            allowedKeys[e.keyCode] ? player.handleInput(allowedKeys[e.keyCode]): false;
+            gameKeys[e.keyCode] ? gameManager.handleInput(gameKeys[e.keyCode]): false;
         });
     
     

@@ -57,8 +57,9 @@ var Engine = (function(global) {
         /* Use the browser's requestAnimationFrame function to call this
          * function again as soon as the browser is able to draw another frame.
          */
-         animation = win.requestAnimationFrame(main);
-         global.animation = animation;
+        animation = win.requestAnimationFrame(main)
+        //gameState === 'running'?animation = win.requestAnimationFrame(main):init();
+         //console.log(animation);
         // setInterval(function(){
         //     main();
         //     console.log(dt)
@@ -85,7 +86,9 @@ var Engine = (function(global) {
      * on the entities themselves within your app.js file).
      */
     function update(dt) {
-        updateEntities(dt);
+         updateEntities(dt)
+        //gameState === 'stopped' ? win.cancelAnimationFrame(animation): updateEntities(dt) ;
+
         // checkCollisions();
     }
 
@@ -181,9 +184,16 @@ var Engine = (function(global) {
      * those sorts of things. It's only called once by the init() method.
      */
     function reset() {
-        // noop
-        console.log('reset');
-        return
+         console.log(gameState+"FROM RESET")
+         if (gameState === 'gameover'){
+         console.log('GAMEOVER');
+        debugger
+        
+        
+        
+        }
+        
+        
     }
 
     /* Go ahead and load all of the images we know we're going to need to
@@ -201,6 +211,7 @@ var Engine = (function(global) {
         'images/Gem-Orange-small.png',
         'images/Key-small.png',
         'images/Rock.png',
+        'images/Heart-small.png',
     ]);
     Resources.onReady(init);
 
@@ -209,6 +220,6 @@ var Engine = (function(global) {
      * from within their app.js files.
      */
     global.ctx = ctx;
-    global.reset = reset;
+    
     
 })(this);
