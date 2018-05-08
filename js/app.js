@@ -2,22 +2,37 @@
  let speedlevel = 150;
  let firstLoad = true;
  let gameState = 'paused';
- let winningScore = 150;
+ let winningScore = 100;
  let allEnemies = [];
  let collectables = [];
  let maxEnemies = 3;
  let level = 1;
+ 
+
+const MessageManager = function(){
+    
+    this.printMessage = function(msg='hit enter to start'){
+        console.log('OK');
+        ctx.font="40px Georgia";
+        ctx.fillText('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',0,0);
+        
+        console.log('fatto');
+    }
+}
+
+const messageManager = new MessageManager();
 
  const GameManager = function(){
     
 
     this.start = function(){
+        
         if( gameState === 'paused' || gameState === 'gameOver' ){
             firstLoad = false;
             allEnemies = [];
             collectables = [];
             myEnemy = new Enemy();
-            gameState === 'gameOver'? player = new Player():false;    
+            gameState === 'gameOver'?(level = 1, player = new Player()):false;    
             allEnemies.push(myEnemy);
             gameState = 'running';
 
@@ -25,14 +40,14 @@
     }
     
      this.gameOver = function(){
+         
          console.log('gameover FUNCTION');
          sfx.gameOver.play();
          allEnemies = [];
          collectables = [];
          speedlevel = 150;
          gameState = 'gameOver';         
-         alert('GAME OVER - YOU REACHED LEVEL: '+level+' - YOUR SCORE: '+player.score)
-         level = 1;
+         //alert('GAME OVER - YOU REACHED LEVEL: '+level+' - YOUR SCORE: '+player.score)         ;
          winningScore = 100;
          
      }
@@ -47,7 +62,7 @@
          gameState = 'paused';
          winningScore += 100;
          level++;
-         alert('LEVEL '+level)
+        //  alert('LEVEL '+level)
          this.start();
      }
 
@@ -66,6 +81,7 @@
 
             case 'heart':
                 player.health++;
+                player.healthLevel = '❤'.repeat(player.health)
                 sfx.pick.play(); 
             break
         
@@ -174,11 +190,12 @@ if (player.x+20 < this.x + 101  &&
     player.x-40 + 101  > this.x  &&
 	player.y === this.track.trackValue ) {    
         sfx.collision.play();
-        player.health--;    
+        player.health--;
+        player.healthLevel = '❤'.repeat(player.health);
         player.repositioning = true;
     }
 
-    this.x < 505? this.x += this.speedfactor * dt: this.restart();       
+    this.x < 505? this.x += this.speedfactor * dt: this.restart();
 };
 
 // Draw the enemy on the screen, required method for game
@@ -241,10 +258,13 @@ const Player = function(){
     this.repositioning = false;
     this.score = 0;
     this.capabilities = [];
+    this.healthLevel = '❤❤❤';
 
 }
 
 Player.prototype.update = function(dt){
+
+    this.capabilities.includes('hasKey')? this.sprite = 'images/char-boy-key.png':this.sprite = 'images/char-boy.png';
     
     if(this.y < 0 && this.capabilities.includes('hasKey')){
         console.log(gameState);
@@ -277,11 +297,8 @@ Player.prototype.update = function(dt){
 
     if (this.repositioning === false && collectables.length ){
         if (this.x === collectables[0].x && this.y === collectables[0].y){
-            // collectables[0].power.length?( this.capabilities.push(collectables[0].power),sfx.hasKey.play()): sfx.pick.play();
-            //  this.score += collectables[0].value
-             //collectables = [];
              gameManager.evaluateCollectable(collectables[0]);
-             
+
             }
     }
 
@@ -294,7 +311,8 @@ Player.prototype.reset = function(){
 }
 
 Player.prototype.render = function(){
-    ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+     ctx.fillText(gameState||'',this.x+50,this.y+50);
 }
 
 
@@ -401,6 +419,7 @@ const Collectable = function(){
 
     if(firstLoad){
         console.log(firstLoad)
+       
         alert('COLLECT GEMS, GET A KEY AND PUT THE KEY IN THE CHEST')
     }else{
     // let allEnemies = [];
@@ -437,6 +456,11 @@ const Collectable = function(){
             allowedKeys[e.keyCode] ? player.handleInput(allowedKeys[e.keyCode]): false;
             gameKeys[e.keyCode] ? gameManager.handleInput(gameKeys[e.keyCode]): false;
         });
+
+        // window.addEventListener("load", function(event) {
+        //     console.log("All resources finished loading!");
+        //     messageManager.printMessage();
+        //   });
     
     
     

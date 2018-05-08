@@ -155,6 +155,7 @@ var Engine = (function(global) {
         }
 
         renderEntities();
+        
     }
 
     /* This function is called by the render function and is called on each game
@@ -176,7 +177,10 @@ var Engine = (function(global) {
 
         player.render();
        
-        
+        ctx.font='20px Monospace';
+        ctx.fillText('Level: '+level + '  Score: '+player.score,0,30);
+
+        ctx.fillText('Health:'+player.healthLevel ,370,30);
     }
 
     /* This function does nothing but it could have been a good place to
@@ -209,6 +213,7 @@ var Engine = (function(global) {
         'images/Key-small.png',
         'images/Rock.png',
         'images/Heart-small.png',
+        'images/char-boy-key.png',
     ]);
     Resources.onReady(init);
 
