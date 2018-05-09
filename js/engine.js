@@ -58,12 +58,8 @@ var Engine = (function(global) {
          * function again as soon as the browser is able to draw another frame.
          */
         animation = win.requestAnimationFrame(main)
-        //gameState === 'running'?animation = win.requestAnimationFrame(main):init();
-         //console.log(animation);
-        // setInterval(function(){
-        //     main();
-        //     console.log(dt)
-        // },2000);
+        
+        
     }
 
     /* This function does some initial setup that should only occur once,
@@ -123,7 +119,7 @@ var Engine = (function(global) {
          * for that particular row of the game level.
          */
         var rowImages = [
-                'images/water-block.png',   // Top row is water
+                'images/water-wall-block.png',   // Top row is water
                 'images/stone-block.png',   // Row 1 of 3 of stone
                 'images/stone-block.png',   // Row 2 of 3 of stone
                 'images/stone-block.png',   // Row 3 of 3 of stone
@@ -133,6 +129,8 @@ var Engine = (function(global) {
             numRows = 6,
             numCols = 5,
             row, col;
+
+            player.capabilities.includes('hasKey') ? rowImages[0]='images/water-block.png':false;
         
         // Before drawing, clear existing canvas
         ctx.clearRect(0,0,canvas.width,canvas.height)
@@ -179,7 +177,6 @@ var Engine = (function(global) {
        
         ctx.font='20px Monospace';
         ctx.fillText('Level: '+level + '  Score: '+player.score,0,30);
-
         ctx.fillText('Health:'+player.healthLevel ,370,30);
     }
 
@@ -188,11 +185,7 @@ var Engine = (function(global) {
      * those sorts of things. It's only called once by the init() method.
      */
     function reset() {
-        //  console.log(gameManager.gameState+" FROM RESET")
-        //  if (gameManager.gameState === 'gameover'){
-        //  console.log('GAMEOVER');
-        // debugger    
-        //}
+      
         
         
     }
@@ -204,8 +197,9 @@ var Engine = (function(global) {
     Resources.load([
         'images/stone-block.png',
         'images/water-block.png',
+        'images/water-wall-block.png',
         'images/grass-block.png',
-        'images/enemy-bug-2.png',
+        'images/enemy-bug.png',
         'images/char-boy.png',
         'images/Gem-Blue-small.png',
         'images/Gem-Green-small.png',

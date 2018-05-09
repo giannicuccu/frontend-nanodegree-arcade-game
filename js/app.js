@@ -7,20 +7,21 @@
  let collectables = [];
  let maxEnemies = 3;
  let level = 1;
+ let startTime = Date.now();
  
 
-const MessageManager = function(){
+// const MessageManager = function(){
     
-    this.printMessage = function(msg='hit enter to start'){
-        console.log('OK');
-        ctx.font="40px Georgia";
-        ctx.fillText('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',0,0);
+//     this.printMessage = function(msg='hit enter to start'){
+//         console.log('OK');
+//         ctx.font="40px Georgia";
+//         ctx.fillText('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',0,0);
         
-        console.log('fatto');
-    }
-}
+//         //console.log('fatto');
+//     }
+// }
 
-const messageManager = new MessageManager();
+//const messageManager = new MessageManager();
 
  const GameManager = function(){
     
@@ -41,7 +42,7 @@ const messageManager = new MessageManager();
     
      this.gameOver = function(){
          
-         console.log('gameover FUNCTION');
+         //console.log('gameover FUNCTION');
          sfx.gameOver.play();
          allEnemies = [];
          collectables = [];
@@ -54,7 +55,7 @@ const messageManager = new MessageManager();
  
      this.win = function(){
          //gameState = 'win';
-         console.log('WIN FUNCTION');
+         //console.log('WIN FUNCTION');
          sfx.win.play();
          allEnemies = [];
          collectables = [];
@@ -172,7 +173,7 @@ var Enemy = function() {
 
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
-    this.sprite = 'images/enemy-bug-2.png';
+    this.sprite = 'images/enemy-bug.png';
     this.speedfactor = Math.floor(Math.random() * (180 - 140 + 1)) + 140;
     this.number = allEnemies.length || 0;
     this.track = gridManager.assigntrack();
@@ -267,14 +268,14 @@ Player.prototype.update = function(dt){
     this.capabilities.includes('hasKey')? this.sprite = 'images/char-boy-key.png':this.sprite = 'images/char-boy.png';
     
     if(this.y < 0 && this.capabilities.includes('hasKey')){
-        console.log(gameState);
+        //console.log(gameState);
         this.repositioning = true;
         gameManager.win();
        
     }
 
     if(this.health <= 0 && gameState != 'gameOver'){
-        console.log(gameState);
+        //console.log(gameState);
         this.repositioning = true;
         gameManager.gameOver();
         
@@ -337,7 +338,7 @@ Player.prototype.handleInput = function(keyCode){
         default:
             break;
     }
-    console.log(this)
+    //console.log(this)
 }
 
 
@@ -420,7 +421,7 @@ const Collectable = function(){
     if(firstLoad){
         console.log(firstLoad)
        
-        alert('COLLECT GEMS, GET A KEY AND PUT THE KEY IN THE CHEST')
+        //alert('COLLECT GEMS, GET A KEY AND PUT THE KEY IN THE CHEST')
     }else{
     // let allEnemies = [];
     // let collectables = [];
