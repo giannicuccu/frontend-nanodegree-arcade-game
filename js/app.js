@@ -1,7 +1,7 @@
  
  let speedlevel = 150;
  let firstLoad = true;
- let gameState = 'paused';
+ let gameState = 'readyToStart';
  let winningScore = 100;
  let allEnemies = [];
  let collectables = [];
@@ -28,7 +28,7 @@
 
     this.start = function(){
         
-        if( gameState === 'paused' || gameState === 'gameOver' ){
+        if( gameState === 'readyToStart' || gameState === 'gameOver' ){
             firstLoad = false;
             allEnemies = [];
             collectables = [];
@@ -60,7 +60,7 @@
          allEnemies = [];
          collectables = [];
          player.capabilities = [];
-         gameState = 'paused';
+         gameState = 'readyToStart';
          winningScore += 100;
          level++;
         //  alert('LEVEL '+level)
