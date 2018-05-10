@@ -320,6 +320,8 @@ Player.prototype.render = function(){
 
 
 Player.prototype.handleInput = function(keyCode){
+
+    if(gameState === 'running'){
     switch (keyCode) {
         case 'up':            
             //this.up(); 
@@ -340,6 +342,7 @@ Player.prototype.handleInput = function(keyCode){
         default:
             break;
     }
+}
     //console.log(this)
 }
 
