@@ -4,7 +4,7 @@
  let gameState = 'readyToStart';
  let winningScore = 100;
  let allEnemies = [];
- let collectables = [];
+ let collectibles = [];
  let maxEnemies = 3;
  let level = 1;
  let startTime = Date.now();
@@ -31,7 +31,7 @@
         if( gameState === 'readyToStart' || gameState === 'gameOver' ){
             firstLoad = false;
             allEnemies = [];
-            collectables = [];
+            collectibles = [];
             myEnemy = new Enemy();
             gameState === 'gameOver'?(level = 1, player = new Player()):false;    
             allEnemies.push(myEnemy);
@@ -45,7 +45,7 @@
          //console.log('gameover FUNCTION');
          sfx.gameOver.play();
          allEnemies = [];
-         collectables = [];
+         collectibles = [];
          speedlevel = 150;
          gameState = 'gameOver';         
          //alert('GAME OVER - YOU REACHED LEVEL: '+level+' - YOUR SCORE: '+player.score)         ;
@@ -58,7 +58,7 @@
          //console.log('WIN FUNCTION');
          sfx.win.play();
          allEnemies = [];
-         collectables = [];
+         collectibles = [];
          player.capabilities = [];
          gameState = 'readyToStart';
          winningScore += 100;
@@ -67,16 +67,16 @@
          this.start();
      }
 
-    this.evaluateCollectable = function(collectable){
-        //console.log(collectable);
-        switch (collectable.name) {
+    this.evaluateCollectible = function(collectible){
+        //console.log(collectible);
+        switch (collectible.name) {
             case 'gem':
-                player.score += collectables[0].value;
+                player.score += collectibles[0].value;
                 sfx.pick.play();                
             break;
             
             case 'key':
-                player.capabilities.push(collectables[0].power);
+                player.capabilities.push(collectibles[0].power);
                 sfx.hasKey.play();
             break
 
@@ -89,9 +89,9 @@
             default:
                 break;
         }
-        // collectables[0].power.length?( player.capabilities.push(collectables[0].power),sfx.hasKey.play()): sfx.pick.play();
-        // player.score += collectables[0].value
-        collectables = [];
+        // collectibles[0].power.length?( player.capabilities.push(collectibles[0].power),sfx.hasKey.play()): sfx.pick.play();
+        // player.score += collectibles[0].value
+        collectibles = [];
     }
 
 
@@ -100,6 +100,8 @@
            case 'start':
                this.start();
                break;
+
+         //   TODO: add pause function
         //    case 'pause':
         //        this.pause();
         //        break;
@@ -227,11 +229,11 @@ Enemy.prototype.restart = function() {
 
     this.number === 0 && allEnemies.length <= maxEnemies-1 ? this.addEnemy()  : false;
     
-    if(this.number === 1  && collectables.length === 0){        
+    if(this.number === 1  && collectibles.length === 0){        
         if(player.score >= winningScore && !player.capabilities.includes('hasKey')){
-            collectables.push(new Key())
+            collectibles.push(new Key())
         }else{
-            player.health===1? collectables.push(new Heart()):collectables.push(new Gem())
+            player.health===1? collectibles.push(new Heart()):collectibles.push(new Gem())
         }
      }
      
@@ -296,9 +298,9 @@ Player.prototype.update = function(dt){
         }
     }
 
-    if (this.repositioning === false && collectables.length ){
-        if (this.x === collectables[0].x && this.y === collectables[0].y){
-             gameManager.evaluateCollectable(collectables[0]);
+    if (this.repositioning === false && collectibles.length ){
+        if (this.x === collectibles[0].x && this.y === collectibles[0].y){
+             gameManager.evaluateCollectible(collectibles[0]);
 
             }
     }
@@ -348,7 +350,7 @@ Player.prototype.handleInput = function(keyCode){
 
 
 
-const Collectable = function(){
+const Collectible = function(){
     this.track = gridManager.assigntrack(1,3);
     this.column = gridManager.assignCol();
     this.x = this.column.colValue
@@ -360,16 +362,16 @@ const Collectable = function(){
     
 }
 
-    Collectable.prototype.render = function(){
+    Collectible.prototype.render = function(){
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
     }
     
-    Collectable.prototype.update = function(){
+    Collectible.prototype.update = function(){
         
     }
         
     const Gem = function(){
-        Collectable.call(this);
+        Collectible.call(this);
         this.name = 'gem';
         if(this.column.colNumber === 0){
             this.sprite = 'images/Gem-Orange-small.png' ;
@@ -384,12 +386,12 @@ const Collectable = function(){
         
     }
     
-    Gem.prototype = Object.create(Collectable.prototype);
+    Gem.prototype = Object.create(Collectible.prototype);
     Gem.prototype.constructor = Gem;
 
 
     const Key = function(){
-        Collectable.call(this);
+        Collectible.call(this);
         this.name = 'key';
         this.column = gridManager.assignCol(0,-1);
         this.x = this.column.colValue;
@@ -397,11 +399,11 @@ const Collectable = function(){
         this.power = 'hasKey';
     }
     
-    Key.prototype = Object.create(Collectable.prototype);
+    Key.prototype = Object.create(Collectible.prototype);
     Key.prototype.constructor = Key;
 
     const Heart = function(){
-        Collectable.call(this);
+        Collectible.call(this);
         this.name = 'heart';
         this.column = gridManager.assignCol(0,-1);
         this.x = this.column.colValue;
@@ -409,7 +411,7 @@ const Collectable = function(){
         this.power = 'addHealth';
     }
     
-    Heart.prototype = Object.create(Collectable.prototype);
+    Heart.prototype = Object.create(Collectible.prototype);
     Heart.prototype.constructor = Heart;
     
     
@@ -424,14 +426,14 @@ const Collectable = function(){
         //alert('COLLECT GEMS, GET A KEY AND PUT THE KEY IN THE CHEST')
     }else{
     // let allEnemies = [];
-    // let collectables = [];
+    // let collectibles = [];
     let myEnemy = new Enemy();
     let player = new Player();    
     allEnemies.push(myEnemy);
 }
 
     // let allEnemies = [];
-    // let collectables = [];
+    // let collectibles = [];
     let player = new Player();
         
         // This listens for key presses and sends the keys to your

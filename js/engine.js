@@ -97,8 +97,8 @@ var Engine = (function(global) {
      */
     function updateEntities(dt) {
         
-        collectables.forEach(function(collectable) {
-            collectable.update(dt);
+        collectibles.forEach(function(collectible) {
+            collectible.update(dt);
         });
         allEnemies.forEach(function(enemy) {
             enemy.update(dt);
@@ -164,7 +164,7 @@ var Engine = (function(global) {
         /* Loop through all of the objects within the allEnemies array and call
          * the render function you have defined.
          */
-        collectables.forEach(function(gem) {            
+        collectibles.forEach(function(gem) {            
             gem.render();
             
         });
