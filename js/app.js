@@ -11,7 +11,8 @@
  
 
 const MessageManager = function(){
-    //this.msg = ''
+    
+    
     this.setMessage = function(message){
         this.msg = message               
     }
@@ -19,12 +20,16 @@ const MessageManager = function(){
     this.render = function(){
         if(this.msg){
         ctx.textAlign = "center";
-        ctx.font="50px monospace";
+        ctx.strokeStyle = '#FFA500';
+        ctx.font="50px Bungee";
         ctx.strokeText(this.msg[0],252,260);
-        ctx.font="20px monospace";
-        ctx.fillText(this.msg[1],252,280);
-        ctx.font="23px monospace";
+        ctx.fillText(this.msg[0],252,260);
+        ctx.font="22px Bungee";
+        ctx.fillText(this.msg[1],252,285);
+        ctx.strokeText(this.msg[1],252,285);
+        ctx.font="18px Bungee";
         ctx.fillText(this.msg[2],252,330);
+        ctx.font="20px monospace";
         ctx.textAlign = "left";
         }
     }
@@ -50,6 +55,7 @@ const messageManager = new MessageManager();
     }
     
      this.gameOver = function(){
+
          sfx.gameOver.play();
          allEnemies = [];
          collectibles = [];
@@ -72,46 +78,35 @@ const messageManager = new MessageManager();
         winningScore += 100;
         speedlevel += 50;
         level++;
-        //messageManager.setMessage('LEVEL: '+level);
         this.start();
     }
  
      this.win = function(){
-        //  //gameState = 'win';
-        //  //console.log('WIN FUNCTION');
-        //  sfx.win.play();
-        //  allEnemies = [];
-        //  collectibles = [];
-        //  player.capabilities = [];
-        //  gameState = 'readyToStart';
-        //  winningScore += 100;
-        //  //player.score += 1000;
-        //  level++;
-        // //  alert('LEVEL '+level)
-        //  this.start();
+        //noop
+
      }
 
     this.evaluateCollectible = function(collectible){
-        //console.log(collectible);
+
         switch (collectible.name) {
             case 'gem':
                 player.score += collectibles[0].value;
                 sfx.pick.play();                
-            break;
+                break;
 
             case 'key':
                 player.capabilities.push(collectibles[0].power);
                 sfx.hasKey.play();
-            break
+                break;
 
             case 'heart':
                 player.health++;
                 player.healthLevel = '❤'.repeat(player.health)
                 sfx.pick.play(); 
-            break
+                break;
         
             default:
-                break;
+            break;
         }
         // collectibles[0].power.length?( player.capabilities.push(collectibles[0].power),sfx.hasKey.play()): sfx.pick.play();
         // player.score += collectibles[0].value
@@ -137,7 +132,7 @@ const messageManager = new MessageManager();
     }
  }
 
- //const gameManager = new GameManager();
+
 
  const Soundfx = function (){
      // soundFx from https://freesound.org
@@ -183,8 +178,6 @@ const messageManager = new MessageManager();
 
  }
 
-// instantiate gridmanager
-//const gridManager = new GridManager();
 
 // Enemies our player must avoid
 var Enemy = function() {
@@ -383,9 +376,7 @@ const Collectible = function(){
     this.sprite = '';
     this.value = 0;
     this.power = '';
-    
-    
-}
+    }
 
     Collectible.prototype.render = function(){
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
@@ -394,7 +385,8 @@ const Collectible = function(){
     Collectible.prototype.update = function(){
      // noop
     }
-        
+
+
     const Gem = function(){
         Collectible.call(this);
         this.name = 'gem';
@@ -456,10 +448,10 @@ const Collectible = function(){
         
     }else{
     
-    let myEnemy = new Enemy();
-    let player = new Player();    
-    allEnemies.push(myEnemy);
-}
+    // let myEnemy = new Enemy();
+    // let player = new Player();    
+    // allEnemies.push(myEnemy);
+    }
 
  
     let player = new Player();
@@ -481,19 +473,8 @@ const Collectible = function(){
                
             }
 
-            // console.log(allowedKeys[e.keyCode]);
-            // console.log(gameKeys[e.keyCode]);
-            
+
             allowedKeys[e.keyCode] ? player.handleInput(allowedKeys[e.keyCode]): false;
             gameKeys[e.keyCode] ? gameManager.handleInput(gameKeys[e.keyCode]): false;
         });
 
-        // window.addEventListener("load", function(event) {
-        //     console.log("All resources finished loading!");
-        //     messageManager.printMessage();
-        //   });
-    
-    
-    
-    
-    
