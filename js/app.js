@@ -2,7 +2,7 @@
  let speedlevel = 150;
  let firstLoad = true;
  let gameState = 'readyToStart';
- let winningScore = 100;
+ let winningScore = 100; //
  let allEnemies = [];
  let collectibles = [];
  let maxEnemies = 3;
@@ -10,61 +10,85 @@
  let startTime = Date.now();
  
 
-// const MessageManager = function(){
-    
-//     this.printMessage = function(msg='hit enter to start'){
-//         console.log('OK');
-//         ctx.font="40px Georgia";
-//         ctx.fillText('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',0,0);
-        
-//         //console.log('fatto');
-//     }
-// }
+const MessageManager = function(){
+    //this.msg = ''
+    this.setMessage = function(message){
+        this.msg = message               
+    }
 
-//const messageManager = new MessageManager();
+    this.render = function(){
+        if(this.msg){
+        ctx.textAlign = "center";
+        ctx.font="50px monospace";
+        ctx.strokeText(this.msg[0],252,260);
+        ctx.font="20px monospace";
+        ctx.fillText(this.msg[1],252,280);
+        ctx.font="23px monospace";
+        ctx.fillText(this.msg[2],252,330);
+        ctx.textAlign = "left";
+        }
+    }
+}
+
+const messageManager = new MessageManager();
 
  const GameManager = function(){
-    
 
     this.start = function(){
-        
-        if( gameState === 'readyToStart' || gameState === 'gameOver' ){
+        if( gameState === 'readyToStart' || gameState === 'levelUp' || gameState === 'gameOver' ){
             firstLoad = false;
             allEnemies = [];
             collectibles = [];
             myEnemy = new Enemy();
-            gameState === 'gameOver'?(level = 1, player = new Player()):false;    
+            gameState === 'gameOver'?(level = 1, player = new Player()):false;
             allEnemies.push(myEnemy);
             gameState = 'running';
-
+            messageManager.setMessage(['','',''])
+            
         }
+        
     }
     
      this.gameOver = function(){
-         
-         //console.log('gameover FUNCTION');
          sfx.gameOver.play();
          allEnemies = [];
          collectibles = [];
          speedlevel = 150;
-         gameState = 'gameOver';         
-         //alert('GAME OVER - YOU REACHED LEVEL: '+level+' - YOUR SCORE: '+player.score)         ;
+         gameState = 'gameOver';
+         messageManager.setMessage(['GAME OVER',
+                                    'LEVEL:'+level+' - SCORE:'+player.score,
+                                    'Press Enter to start a new game']);
          winningScore = 100;
          
      }
+
+     this.levelUp = function(){
+
+        sfx.win.play();
+        allEnemies = [];
+        collectibles = [];
+        player.capabilities = [];
+        gameState = 'levelUp';
+        winningScore += 100;
+        speedlevel += 50;
+        level++;
+        //messageManager.setMessage('LEVEL: '+level);
+        this.start();
+    }
  
      this.win = function(){
-         //gameState = 'win';
-         //console.log('WIN FUNCTION');
-         sfx.win.play();
-         allEnemies = [];
-         collectibles = [];
-         player.capabilities = [];
-         gameState = 'readyToStart';
-         winningScore += 100;
-         level++;
-        //  alert('LEVEL '+level)
-         this.start();
+        //  //gameState = 'win';
+        //  //console.log('WIN FUNCTION');
+        //  sfx.win.play();
+        //  allEnemies = [];
+        //  collectibles = [];
+        //  player.capabilities = [];
+        //  gameState = 'readyToStart';
+        //  winningScore += 100;
+        //  //player.score += 1000;
+        //  level++;
+        // //  alert('LEVEL '+level)
+        //  this.start();
      }
 
     this.evaluateCollectible = function(collectible){
@@ -74,7 +98,7 @@
                 player.score += collectibles[0].value;
                 sfx.pick.play();                
             break;
-            
+
             case 'key':
                 player.capabilities.push(collectibles[0].power);
                 sfx.hasKey.play();
@@ -101,10 +125,10 @@
                this.start();
                break;
 
-         //   TODO: add pause function
+        //   TODO: add pause function
         //    case 'pause':
         //        this.pause();
-        //        break;
+        //    break;
        
            default:
                break;
@@ -113,9 +137,7 @@
     }
  }
 
- const gameManager = new GameManager();
-
-
+ //const gameManager = new GameManager();
 
  const Soundfx = function (){
      // soundFx from https://freesound.org
@@ -127,12 +149,8 @@
      this.gameOver = new Audio('sfx/game-over.mp3');
      }
 
-    let sfx = new Soundfx();
-
     
 
-
- 
 
 
  const GridManager = function(){
@@ -166,7 +184,7 @@
  }
 
 // instantiate gridmanager
-const gridManager = new GridManager();
+//const gridManager = new GridManager();
 
 // Enemies our player must avoid
 var Enemy = function() {
@@ -189,13 +207,10 @@ Enemy.prototype.update = function(dt) {
     // which will ensure the game runs at the same speed for
     // all computers.
 
-if (player.x+20 < this.x + 101  && 
-    player.x-40 + 101  > this.x  &&
-	player.y === this.track.trackValue ) {    
-        sfx.collision.play();
-        player.health--;
-        player.healthLevel = '❤'.repeat(player.health);
-        player.repositioning = true;
+if ( player.x+20 < this.x + 101  && 
+     player.x-40 + 101  > this.x  &&
+	 player.y === this.track.trackValue ) {
+            player.enemyCollision();
     }
 
     this.x < 505? this.x += this.speedfactor * dt: this.restart();
@@ -203,8 +218,8 @@ if (player.x+20 < this.x + 101  &&
 
 // Draw the enemy on the screen, required method for game
 Enemy.prototype.render = function() {
+
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-    
 };
 
 
@@ -212,7 +227,7 @@ Enemy.prototype.restart = function() {
         
     this.track = gridManager.assigntrack();
     this.y = this.track.trackValue;
-    this.speedfactor = ++speedlevel + Math.floor(Math.random() * (70 - 10 + 1)) + 10;        
+    this.speedfactor = speedlevel + Math.floor(Math.random() * (70 - 10 + 1)) + 10;        
     
     let currentTrack = this.track.trackNumber;
     let currentNumber = this.number;
@@ -243,7 +258,7 @@ Enemy.prototype.addEnemy = function(){
     let delay = Math.floor(Math.random() * (4500 - 1250 + 1)) + 1250
     setTimeout(() => {
       let enemy = new Enemy();
-        gameState === 'running'? allEnemies.push(enemy): false;   
+        gameState === 'running'? allEnemies.push(enemy): false;
     }, delay);
 }
 
@@ -270,14 +285,14 @@ Player.prototype.update = function(dt){
     this.capabilities.includes('hasKey')? this.sprite = 'images/char-boy-key.png':this.sprite = 'images/char-boy.png';
     
     if(this.y < 0 && this.capabilities.includes('hasKey')){
-        //console.log(gameState);
+        
         this.repositioning = true;
-        gameManager.win();
+        gameManager.levelUp();
        
     }
 
     if(this.health <= 0 && gameState != 'gameOver'){
-        //console.log(gameState);
+        
         this.repositioning = true;
         gameManager.gameOver();
         
@@ -308,6 +323,13 @@ Player.prototype.update = function(dt){
 
 }
 
+Player.prototype.enemyCollision = function(){
+    sfx.collision.play();
+    this.health--;
+    this.healthLevel = '❤'.repeat(player.health);
+    this.repositioning = true;
+}
+
 Player.prototype.reset = function(){
     this.x = 202;
     this.y = 400;
@@ -315,7 +337,8 @@ Player.prototype.reset = function(){
 
 Player.prototype.render = function(){
      ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-     ctx.fillText(gameState||'',this.x+50,this.y+50);
+     //ctx.fillText(gameState||'',this.x+50,this.y+50);
+     this.capabilities.includes('hasKey')?ctx.fillText('reach the river',this.x+50,this.y+50):false;
 }
 
 
@@ -325,11 +348,10 @@ Player.prototype.handleInput = function(keyCode){
     switch (keyCode) {
         case 'up':            
             //this.up(); 
-            this.y > -15 ? this.y -= 83: false           
+            this.y > -15 ? this.y -= 83: false
             break;
         case 'down': 
-        //this.down();
-        this.y < 400 ? this.y += 83: false;           
+            this.y < 400 ? this.y += 83: false;
             break;
         case 'left': 
             //this.left();
@@ -343,7 +365,7 @@ Player.prototype.handleInput = function(keyCode){
             break;
     }
 }
-    //console.log(this)
+
 }
 
 
@@ -358,10 +380,10 @@ const Collectible = function(){
     this.column = gridManager.assignCol();
     this.x = this.column.colValue
     this.y = this.track.trackValue;
-    this.sprite = '' ;
+    this.sprite = '';
     this.value = 0;
-    this.power = ''; 
-    //console.log(this) 
+    this.power = '';
+    
     
 }
 
@@ -370,7 +392,7 @@ const Collectible = function(){
     }
     
     Collectible.prototype.update = function(){
-        
+     // noop
     }
         
     const Gem = function(){
@@ -422,21 +444,24 @@ const Collectible = function(){
     // Place all enemy objects in an array called allEnemies
     // Place the player object in a variable called player
     
+    const gameManager = new GameManager();
+    const gridManager = new GridManager();
+    let sfx = new Soundfx();
 
     if(firstLoad){
-        console.log(firstLoad)
-       
-        //alert('COLLECT GEMS, GET A KEY AND PUT THE KEY IN THE CHEST')
+        document.addEventListener("DOMContentLoaded", function(event) {
+            messageManager.setMessage(['FROGGER','','Press Enter to start']);
+            
+          });
+        
     }else{
-    // let allEnemies = [];
-    // let collectibles = [];
+    
     let myEnemy = new Enemy();
     let player = new Player();    
     allEnemies.push(myEnemy);
 }
 
-    // let allEnemies = [];
-    // let collectibles = [];
+ 
     let player = new Player();
         
         // This listens for key presses and sends the keys to your

@@ -176,8 +176,12 @@ var Engine = (function(global) {
         player.render();
        
         ctx.font='20px Monospace';
-        ctx.fillText('Level: '+level + '  Score: '+player.score,0,30);
+        ctx.fillText('Level: '+level + '  Score: '+player.score,0,30);        
         ctx.fillText('Health:'+player.healthLevel ,370,30);
+
+        messageManager.render();
+
+        
     }
 
     /* This function does nothing but it could have been a good place to
