@@ -12,20 +12,21 @@ dowload or clone the repository and open index.html.
 
 THE GAME - HOW TO PLAY
 -----------------------
-The goal of the player is to reach the water, to reach the water the player needs to remove the fence.
+The goal of the player is to remove the fence and reach the water.
 
 To remove the fence the player must collect gems and get the key.
 (the key will be available after the player collected some gems).
 
-The player must avoid bug collision, bug collision decrease health level. Health level can be restored by collecting hearts.
+The player must avoid bug collision, bug collision decreases health level. Health level can be restored by collecting hearts.
 
-When the player reach the water it pass to the next level.
+When the player reach the water it passes to the next level.
 
 
-CONTROLS
+
+KEYBOARD CONTROLS
 --------
-Enter key starts the game, 
-use arrow keys to move around
+Enter key: start the game.
+Arrow keys: move around
 
 
 
