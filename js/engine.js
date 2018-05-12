@@ -84,7 +84,6 @@ var Engine = (function(global) {
     function update(dt) {
          updateEntities(dt)
         //gameState === 'stopped' ? win.cancelAnimationFrame(animation): updateEntities(dt) ;
-
         // checkCollisions();
     }
 
@@ -177,6 +176,7 @@ var Engine = (function(global) {
        
         ctx.font='20px Monospace';
         
+        // print level, score and health 
         ctx.fillText('Level: '+level + '  Score: '+player.score,0,30);
         ctx.fillText('Health:'+player.healthLevel ,370,30);
 

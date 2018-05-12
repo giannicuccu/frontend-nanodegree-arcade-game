@@ -1,29 +1,44 @@
  
- let speedlevel = 150;
- let firstLoad = true;
- let gameState = 'readyToStart';
- let winningScore = 100; //
- let allEnemies = [];
- let collectibles = [];
- let maxEnemies = 3;
- let level = 1;
- let startTime = Date.now();
+ // Game variables
+ let speedlevel = 150;              // the starting speedlevel of enemies
+ let firstLoad = true;              // 
+ let gameState = 'readyToStart';    // 
+ let winningScore = 100;            // the amount to reach the next level
+ let allEnemies = [];               // anemies array
+ let collectibles = [];             // gems, key, hearth array
+ let maxEnemies = 3;                // the maximun number of enemies
+ let level = 1;                     // starting level
+ let startTime = Date.now();        // the starting time
  
 
+
+/**
+ * @constructor
+ * @description utility for add and remove overlay messages
+ */
 const MessageManager = function(){
     
-    
-    this.setMessage = function(message,flashMsg=false){
+    /**
+ * @description Set static overlay message
+ * @param {message} string
+ * @param {flashMsg} boolean}
+ */
+    this.setMessage = function(message, flashMsg = false){
         this.msg = message;
         
     }
 
-    this.setFlashMessage = function(message,flashMsg=true){
+/**
+ * @description Set temporized overlay message    // used for levelUp messages
+ * @param {message} string
+ * @param {flashMsg} boolean}
+ */
+   this.setFlashMessage = function(message, flashMsg = true){
         this.msg = message;
         this.flashMsg = flashMsg;
-        flashMsg? console.log('flash'):  console.log('NOT flash');
     }
 
+    // message render function
     this.render = function(){
         if(this.msg){
         ctx.textAlign = "center";
@@ -40,6 +55,7 @@ const MessageManager = function(){
         ctx.textAlign = "left";
         }
 
+        // remove  temporized message after 1500 ms
         if(this.flashMsg){
             setTimeout(() => {               
                 messageManager.setMessage(['','',''])
@@ -51,18 +67,22 @@ const MessageManager = function(){
     }
 }
 
-const messageManager = new MessageManager();
 
+ /**
+ * @constructor
+ * @description Utility to manage gameplay
+ */
  const GameManager = function(){
 
+    // Invoked at Enter keypress to start/restart the game
     this.start = function(){
         if( gameState === 'readyToStart' || gameState === 'levelUp' || gameState === 'gameOver' ){
             firstLoad = false;
             allEnemies = [];
             collectibles = [];
             myEnemy = new Enemy();
-            gameState === 'gameOver'?(level = 1, player = new Player()):false;
-            gameState != 'levelUp'? messageManager.setMessage(['','','']):false;
+            gameState === 'gameOver'?(level = 1, player = new Player()):false; // Reinstantiate player after gamover
+            gameState != 'levelUp'? messageManager.setMessage(['','','']):false; // Hide start and gameover messages
             allEnemies.push(myEnemy);
             gameState = 'running';
             
@@ -70,6 +90,7 @@ const messageManager = new MessageManager();
         
     }
     
+    // Invoked at gameover
      this.gameOver = function(){
 
          sfx.gameOver.play();
@@ -84,6 +105,7 @@ const messageManager = new MessageManager();
          
      }
 
+     // Invoked at level update 
      this.levelUp = function(){
 
         sfx.win.play();
@@ -100,18 +122,18 @@ const messageManager = new MessageManager();
         this.start();
     }
  
-     this.win = function(){
-        //noop
 
-     }
 
+ /**
+ * @description Update player health, score and capabilities.
+ * @param {collectible} object The object collected by the player.
+ */
     this.evaluateCollectible = function(collectible){
 
         switch (collectible.name) {
             case 'gem':
                 player.score += collectibles[0].value;
-                sfx.pick.play();
-                //messageManager.setFlashMessage(['GEM COLLECTED','',''])
+                sfx.pick.play();                
                 break;
 
             case 'key':
@@ -121,7 +143,7 @@ const messageManager = new MessageManager();
 
             case 'heart':
                 player.health++;
-                player.healthLevel = '❤'.repeat(player.health)
+                player.healthLevel = '❤'.repeat(player.health) 
                 sfx.pick.play(); 
                 break;
         
@@ -129,10 +151,15 @@ const messageManager = new MessageManager();
             break;
         }
 
-        collectibles = [];
+        collectibles = []; // Empty the collectible array
     }
 
 
+ /**
+ * @description Handle game start after the first load
+ * or after gameOver.
+ * @param {keyCode} string The key pressed by the user
+ */
     this.handleInput = function(keyCode){
        switch (keyCode) {
            case 'start':
@@ -152,13 +179,16 @@ const messageManager = new MessageManager();
  }
 
 
-
+/**
+ * @constructor
+ * @description Game sounds utility
+ */
  const Soundfx = function (){
      // soundFx from https://freesound.org
      this.pick =  new Audio('sfx/pick.mp3');
      this.collision = new Audio('sfx/toink.mp3');
      this.win = new Audio('sfx/win.mp3');
-     this.buzz = new Audio('sfx/buzz.mp3');
+     //this.buzz = new Audio('sfx/buzz.mp3'); // unused sound
      this.hasKey = new Audio('sfx/haskey.mp3');
      this.gameOver = new Audio('sfx/game-over.mp3');
      }
@@ -166,7 +196,14 @@ const messageManager = new MessageManager();
     
 
 
-
+/**
+ * @constructor
+ * @description utility for positioning object in the grid
+ *  Tracks = horizontal rows (trackNumber 0 is the top row).
+ *  Columns = vertical rows  (colNumber 0 is the leftmost column).
+ *  TrackValue and colValue are used to set the pixel position 
+ *  of player/enemies and gems into the grid.
+  */
  const GridManager = function(){
     this.tracks = {
         0:{trackNumber:0, trackValue:-20},
@@ -185,11 +222,24 @@ const messageManager = new MessageManager();
         4:{colNumber:4,colValue:404}
     };
 
+         /**
+ * @description invoked by enemies, player and collectibles to positioning itself on the grid
+ * @param {min} string minimum row number
+ * @param {max} string minimum row number
+ * @return {randomtrack} a random track (a grid row between the params range)
+  */ 
     this.assigntrack = function(min=1,max=3){
         this.randomtrack = this.tracks[Math.floor(Math.random() * (max - min + 1)) + min];
         return this.randomtrack ;
        };
 
+
+/**
+ * @description invoked by enemies, player and collectibles to positioning itself on the grid
+ * @param {min} string minimum row number
+ * @param {max} string minimum row number
+ * @return {randomtrack} a random track (a grid row between the params range)
+  */
     this.assignCol = function(min=0,max=4){        
         this.randomcol = this.columns[Math.floor(Math.random() * (max - min + 1)) + min] ;
         return this.randomcol;
@@ -198,7 +248,10 @@ const messageManager = new MessageManager();
  }
 
 
-// Enemies our player must avoid
+/**
+ * @constructor
+ * @description Represents the enemy
+ */
 var Enemy = function() {
     // Variables applied to each of our instances go here,
     // we've provided one for you to get started
@@ -219,30 +272,41 @@ Enemy.prototype.update = function(dt) {
     // which will ensure the game runs at the same speed for
     // all computers.
 
-if ( player.x+20 < this.x + 101  && 
+
+// Enemy player collision function
+// horizontal collision area is reduced 20px at left and 40 at right
+if ( player.x+20 < this.x + 101   && 
      player.x-40 + 101  > this.x  &&
 	 player.y === this.track.trackValue ) {
             player.enemyCollision();
     }
 
-    this.x < 505? this.x += this.speedfactor * dt: this.restart();
+    // update enemy position or reposition it if they move off the rightmost col
+    this.x < 505? this.x += this.speedfactor * dt: this.restart();  
 };
 
 // Draw the enemy on the screen, required method for game
 Enemy.prototype.render = function() {
-
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
 };
 
 
+/**
+ * @description reposition the enemy instance out of the canvas, before the leftmost column.
+ * The first instance of Enemy controls other enemies creation
+ * The second instance of Enemy controls collectibile creation
+ * 
+  */
 Enemy.prototype.restart = function() { 
-        
+
     this.track = gridManager.assigntrack();
     this.y = this.track.trackValue;
-    this.speedfactor = speedlevel + Math.floor(Math.random() * (70 - 10 + 1)) + 10;        
+    this.speedfactor = speedlevel + Math.floor(Math.random() * (70 - 10 + 1)) + 10; // add random amount to the default speed
     
     let currentTrack = this.track.trackNumber;
     let currentNumber = this.number;
+
+    // try to avoid enemy overlapping in the same row
     if (allEnemies.find(function (enemy) {
         return enemy.track.trackNumber === currentTrack && enemy.number != currentNumber
     })) {
@@ -251,11 +315,13 @@ Enemy.prototype.restart = function() {
     } else { 
         this.x = -101; }
     
-      
+    // draw the enemy sprite
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
-
+    
+    // add enemy (below maxEnemies value)
     this.number === 0 && allEnemies.length <= maxEnemies-1 ? this.addEnemy()  : false;
     
+    // instantiate collectibiles
     if(this.number === 1  && collectibles.length === 0){        
         if(player.score >= winningScore && !player.capabilities.includes('hasKey')){
             collectibles.push(new Key())
@@ -266,6 +332,9 @@ Enemy.prototype.restart = function() {
      
 };
 
+/**
+ * @description instantiate new enemy with a random delay
+ */
 Enemy.prototype.addEnemy = function(){
     let delay = Math.floor(Math.random() * (4500 - 1250 + 1)) + 1250
     setTimeout(() => {
@@ -274,28 +343,35 @@ Enemy.prototype.addEnemy = function(){
     }, delay);
 }
 
+
+
+
 // Now write your own player class
 // This class requires an update(), render() and
 // a handleInput() method.
 
-
+/**
+ * @constructor
+ * @description Represents the player
+ */
 const Player = function(){
     this.sprite = 'images/char-boy.png';
     this.x = 202;
     this.y = 400;
-    this.health = 3;
+    this.health = 3;             // this holds current player health level
     this.speedfactor = 600;
-    this.repositioning = false;
+    this.repositioning = false;  // setting this to true disable collision detection
     this.score = 0;
     this.capabilities = [];
-    this.healthLevel = '❤❤❤';
+    this.healthLevel = '❤❤❤'; // used just for display health level in the UI
 
 }
 
 Player.prototype.update = function(dt){
-
+    // update player sprite while it holds a key
     this.capabilities.includes('hasKey')? this.sprite = 'images/char-boy-key.png':this.sprite = 'images/char-boy.png';
     
+    // if player enters the top row and have the key increase game level
     if(this.y < 0 && this.capabilities.includes('hasKey')){
         
         this.repositioning = true;
@@ -303,6 +379,7 @@ Player.prototype.update = function(dt){
        
     }
 
+        // if player have no health game over
     if(this.health <= 0 && gameState != 'gameOver'){
         
         this.repositioning = true;
@@ -310,7 +387,8 @@ Player.prototype.update = function(dt){
         
     }
     
-    //TODO: i need  to fix this weird animation workaround :-
+    //TODO: I need  to fix this bad  animation workaround :-
+    // animate the player while returns to starting position
     if (this.repositioning == true) {
         if (this.y <= 400 && this.x >= 222) {
             (this.y += this.speedfactor * dt, this.x -= this.speedfactor * dt)
@@ -325,6 +403,7 @@ Player.prototype.update = function(dt){
         }
     }
 
+    // player collectible collision
     if (this.repositioning === false && collectibles.length ){
         if (this.x === collectibles[0].x && this.y === collectibles[0].y){
              gameManager.evaluateCollectible(collectibles[0]);
@@ -335,6 +414,7 @@ Player.prototype.update = function(dt){
 
 }
 
+// enemy collision 
 Player.prototype.enemyCollision = function(){
     sfx.collision.play();
     this.health--;
@@ -342,6 +422,7 @@ Player.prototype.enemyCollision = function(){
     this.repositioning = true;
 }
 
+// reposition the player in the starting position
 Player.prototype.reset = function(){
     this.x = 202;
     this.y = 400;
@@ -358,7 +439,7 @@ Player.prototype.handleInput = function(keyCode){
 
     if(gameState === 'running'){
     switch (keyCode) {
-        case 'up':            
+        case 'up':
             //this.up(); 
             this.y > -15 ? this.y -= 83: false
             break;
@@ -370,7 +451,7 @@ Player.prototype.handleInput = function(keyCode){
             this.x > 0? this.x -= 101: false;
             break;
         case 'right':
-            //this.right();  
+            //this.right();
             this.x < 402? this.x += 101: false;
             break;
         default:
@@ -381,12 +462,10 @@ Player.prototype.handleInput = function(keyCode){
 }
 
 
-
-
-
-
-
-
+/**
+ * @constructor
+ * @description General parent class for gems, key and hearth
+ */
 const Collectible = function(){
     this.track = gridManager.assigntrack(1,3);
     this.column = gridManager.assignCol();
@@ -397,18 +476,24 @@ const Collectible = function(){
     this.power = '';
     }
 
-    Collectible.prototype.render = function(){
+Collectible.prototype.render = function(){
         ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
     }
     
-    Collectible.prototype.update = function(){
+Collectible.prototype.update = function(){
      // noop
     }
 
 
-    const Gem = function(){
+/**
+ * @constructor
+ * @description Gem class, inherits from Collectible class 
+ */
+const Gem = function(){
         Collectible.call(this);
         this.name = 'gem';
+        // switch Gem color and value according to column position
+        // gems with more value are posiitoned to the left
         if(this.column.colNumber === 0){
             this.sprite = 'images/Gem-Orange-small.png' ;
             this.value = 50;
@@ -422,78 +507,85 @@ const Collectible = function(){
         
     }
     
-    Gem.prototype = Object.create(Collectible.prototype);
-    Gem.prototype.constructor = Gem;
+Gem.prototype = Object.create(Collectible.prototype);
+Gem.prototype.constructor = Gem;
 
 
-    const Key = function(){
+
+/**
+ * @constructor
+ * @description Key class, inherits from Collectible class 
+ */
+const Key = function(){
         Collectible.call(this);
         this.name = 'key';
-        this.column = gridManager.assignCol(0,-1);
+        this.column = gridManager.assignCol(0,-1); // Keys are always in the leftmost column
         this.x = this.column.colValue;
         this.sprite = 'images/Key-small.png'; 
         this.power = 'hasKey';
     }
     
-    Key.prototype = Object.create(Collectible.prototype);
-    Key.prototype.constructor = Key;
+Key.prototype = Object.create(Collectible.prototype);
+Key.prototype.constructor = Key;
 
-    const Heart = function(){
+
+
+/**
+ * @constructor
+ * @description Heart class, inherits from Collectible class 
+ */
+const Heart = function(){
         Collectible.call(this);
         this.name = 'heart';
-        this.column = gridManager.assignCol(0,-1);
+        this.column = gridManager.assignCol(0,-1); // Hearts are always in the leftmost column
         this.x = this.column.colValue;
         this.sprite = 'images/Heart-small.png'; 
         this.power = 'addHealth';
     }
     
-    Heart.prototype = Object.create(Collectible.prototype);
-    Heart.prototype.constructor = Heart;
-    
-    
-    // Now instantiate your objects.
-    // Place all enemy objects in an array called allEnemies
-    // Place the player object in a variable called player
-    
-    const gameManager = new GameManager();
-    const gridManager = new GridManager();
-    let sfx = new Soundfx();
+Heart.prototype = Object.create(Collectible.prototype);
+Heart.prototype.constructor = Heart;
 
-    if(firstLoad){
-        document.addEventListener("DOMContentLoaded", function(event) {
-            messageManager.setMessage(['FROGGER','','Press Enter to start']);
-            
-          });
-        
-    }else{
-    
-    // let myEnemy = new Enemy();
-    // let player = new Player();    
-    // allEnemies.push(myEnemy);
-    }
+
+// Now instantiate your objects.
+// Place all enemy objects in an array called allEnemies
+// Place the player object in a variable called player
+
+const gameManager = new GameManager();
+const gridManager = new GridManager();
+const messageManager = new MessageManager();
+let sfx = new Soundfx();
+let player = new Player();
+
+
+// display the startup message
+if(firstLoad){
+    document.addEventListener("DOMContentLoaded", function(event) {
+        messageManager.setMessage(['FROGGER','','Press Enter to start']);            
+        });        
+}
 
  
-    let player = new Player();
-        
-        // This listens for key presses and sends the keys to your
-        // Player.handleInput() method. You don't need to modify this.
-        // changed to keydown for speed
+    
+    // This listens for key presses and sends the keys to your
+    // Player.handleInput() method. You don't need to modify this.
+    // changed to keydown for speed
 
-        document.addEventListener('keyup', function(e) {
-            var allowedKeys = {
-                37: 'left',
-                38: 'up',
-                39: 'right',
-                40: 'down'
-            };
+    document.addEventListener('keyup', function(e) {
+        var allowedKeys = {
+            37: 'left',
+            38: 'up',
+            39: 'right',
+            40: 'down'
+        };
 
-            var gameKeys ={
-                13:'start'
-               
-            }
+        var gameKeys ={
+            13:'start'
+            
+        }
 
 
-            allowedKeys[e.keyCode] ? player.handleInput(allowedKeys[e.keyCode]): false;
-            gameKeys[e.keyCode] ? gameManager.handleInput(gameKeys[e.keyCode]): false;
-        });
+        allowedKeys[e.keyCode] ? player.handleInput(allowedKeys[e.keyCode]): false;
+        gameKeys[e.keyCode] ? gameManager.handleInput(gameKeys[e.keyCode]): false;
+    });
 
