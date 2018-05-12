@@ -13,8 +13,15 @@
 const MessageManager = function(){
     
     
-    this.setMessage = function(message){
-        this.msg = message               
+    this.setMessage = function(message,flashMsg=false){
+        this.msg = message;
+        
+    }
+
+    this.setFlashMessage = function(message,flashMsg=true){
+        this.msg = message;
+        this.flashMsg = flashMsg;
+        flashMsg? console.log('flash'):  console.log('NOT flash');
     }
 
     this.render = function(){
@@ -32,6 +39,15 @@ const MessageManager = function(){
         ctx.font="20px monospace";
         ctx.textAlign = "left";
         }
+
+        if(this.flashMsg){
+            setTimeout(() => {               
+                messageManager.setMessage(['','',''])
+              }, 1500);
+              this.flashMsg = false;
+        }
+
+
     }
 }
 
@@ -46,9 +62,9 @@ const messageManager = new MessageManager();
             collectibles = [];
             myEnemy = new Enemy();
             gameState === 'gameOver'?(level = 1, player = new Player()):false;
+            gameState != 'levelUp'? messageManager.setMessage(['','','']):false;
             allEnemies.push(myEnemy);
             gameState = 'running';
-            messageManager.setMessage(['','',''])
             
         }
         
@@ -78,6 +94,9 @@ const messageManager = new MessageManager();
         winningScore += 100;
         speedlevel += 50;
         level++;
+        messageManager.setFlashMessage(['LEVEL UP',
+                                        'LEVEL: '+level,
+                                        '']);
         this.start();
     }
  
@@ -91,7 +110,8 @@ const messageManager = new MessageManager();
         switch (collectible.name) {
             case 'gem':
                 player.score += collectibles[0].value;
-                sfx.pick.play();                
+                sfx.pick.play();
+                //messageManager.setFlashMessage(['GEM COLLECTED','',''])
                 break;
 
             case 'key':
@@ -108,8 +128,7 @@ const messageManager = new MessageManager();
             default:
             break;
         }
-        // collectibles[0].power.length?( player.capabilities.push(collectibles[0].power),sfx.hasKey.play()): sfx.pick.play();
-        // player.score += collectibles[0].value
+
         collectibles = [];
     }
 
