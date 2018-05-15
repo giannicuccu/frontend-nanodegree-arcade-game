@@ -1,17 +1,28 @@
- 
+var Game = (function(global) {
  // Game variables
- let speedlevel = 150;              // the starting speedlevel of enemies
- let firstLoad = true;              // 
- let gameState = 'readyToStart';    // 
- let winningScore = 100;            // the amount to reach the next level
- let allEnemies = [];               // anemies array
- let collectibles = [];             // gems, key, hearth array
- let maxEnemies = 3;                // the maximun number of enemies
- let level = 1;                     // starting level
- let startTime = Date.now();        // the starting time
+//  let speedlevel = 150;              // the starting speedlevel of enemies
+//  let firstLoad = true;              // 
+//  let gameState = 'readyToStart';    // 
+//  let winningScore = 100;            // the amount to reach the next level
+//  let allEnemies = [];               // anemies array
+//  let collectibles = [];             // gems, key, hearth array
+//  let maxEnemies = 3;                // the maximun number of enemies
+//  let level = 1;                     // starting level
+//  let startTime = Date.now();        // the starting time
  
+ const gameControl = {
+    speedlevel: 150,
+    firstLoad: true,
+    gameState: 'readyToStart',
+    winningScore: 100,            // the amount to reach the next level
+    allEnemies: [],               // anemies array
+    collectibles: [],             // gems, key, hearth array
+    maxEnemies: 3,                // the maximun number of enemies
+    level: 1
+ }
 
-
+console.log(gameControl.speedlevel)
+//debugger
 /**
  * @constructor
  * @description utility for add and remove overlay messages
@@ -76,16 +87,18 @@ const MessageManager = function(){
 
     // Invoked at Enter keypress to start/restart the game
     this.start = function(){
-        if( gameState === 'readyToStart' || gameState === 'levelUp' || gameState === 'gameOver' ){
-            firstLoad = false;
-            allEnemies = [];
-            collectibles = [];
-            myEnemy = new Enemy();
-            gameState === 'gameOver'?(level = 1, player = new Player()):false; // Reinstantiate player after gamover
-            gameState != 'levelUp'? messageManager.setMessage(['','','']):false; // Hide start and gameover messages
-            allEnemies.push(myEnemy);
-            gameState = 'running';
+        if( gameControl.gameState === 'readyToStart' || gameControl.gameState === 'levelUp' || gameControl.gameState === 'gameOver' ){
+            gameControl.firstLoad = false;
+            //allEnemies = [];
+            gameControl.allEnemies.length = 0
+            gameControl.collectibles.length = 0;
+            myEnemy = new Enemy();console.log(myEnemy);
+            gameControl.gameState === 'gameOver'?(gameControl.level = 1,/*FIXME: player duplication here*/ player.init()):false; // Reinstantiate player after gamover
+            gameControl.gameState != 'levelUp'? messageManager.setMessage(['','','']):false; // Hide start and gameover messages
+            gameControl.allEnemies.push(myEnemy);
             
+            gameControl.gameState = 'running';
+            //debugger
         }
         
     }
@@ -94,14 +107,14 @@ const MessageManager = function(){
      this.gameOver = function(){
 
          sfx.gameOver.play();
-         allEnemies = [];
-         collectibles = [];
-         speedlevel = 150;
-         gameState = 'gameOver';
+         gameControl.allEnemies.length = 0;
+         gameControl.collectibles.length = 0;
+         gameControl.speedlevel = 150;
+         gameControl.gameState = 'gameOver';
          messageManager.setMessage(['GAME OVER',
-                                    'LEVEL:'+level+' - SCORE:'+player.score,
+                                    'LEVEL:'+gameControl.level+' - SCORE:'+player.score,
                                     'Press Enter to start a new game']);
-         winningScore = 100;
+         gameControl.winningScore = 100;
          
      }
 
@@ -109,15 +122,15 @@ const MessageManager = function(){
      this.levelUp = function(){
 
         sfx.win.play();
-        allEnemies = [];
-        collectibles = [];
-        player.capabilities = [];
-        gameState = 'levelUp';
-        winningScore += 100;
-        speedlevel += 50;
-        level++;
+        gameControl.allEnemies.length = 0;
+        gameControl.collectibles.length = 0;
+        player.capabilities.length = 0;
+        gameControl.gameState = 'levelUp';
+        gameControl.winningScore += 100;
+        gameControl.speedlevel += 50;
+        gameControl.level++;
         messageManager.setFlashMessage(['LEVEL UP',
-                                        'LEVEL: '+level,
+                                        'LEVEL: '+gameControl.level,
                                         '']);
         this.start();
     }
@@ -132,12 +145,12 @@ const MessageManager = function(){
 
         switch (collectible.name) {
             case 'gem':
-                player.score += collectibles[0].value;
+                player.score += gameControl.collectibles[0].value;
                 sfx.pick.play();                
                 break;
 
             case 'key':
-                player.capabilities.push(collectibles[0].power);
+                player.capabilities.push(gameControl.collectibles[0].power);
                 sfx.hasKey.play();
                 break;
 
@@ -151,7 +164,7 @@ const MessageManager = function(){
             break;
         }
 
-        collectibles = []; // Empty the collectible array
+        gameControl.collectibles.length = 0; // Empty the collectible array
     }
 
 
@@ -260,7 +273,7 @@ var Enemy = function() {
     // a helper we've provided to easily load images
     this.sprite = 'images/enemy-bug.png';
     this.speedfactor = Math.floor(Math.random() * (180 - 140 + 1)) + 140;
-    this.number = allEnemies.length || 0;
+    this.number = gameControl.allEnemies.length || 0;
     this.track = gridManager.assigntrack();
     this.y = this.track.trackValue;   
     };
@@ -301,13 +314,13 @@ Enemy.prototype.restart = function() {
 
     this.track = gridManager.assigntrack();
     this.y = this.track.trackValue;
-    this.speedfactor = speedlevel + Math.floor(Math.random() * (70 - 10 + 1)) + 10; // add random amount to the default speed
+    this.speedfactor = gameControl.speedlevel + Math.floor(Math.random() * (70 - 10 + 1)) + 10; // add random amount to the default speed
     
     let currentTrack = this.track.trackNumber;
     let currentNumber = this.number;
 
     // try to avoid enemy overlapping in the same row
-    if (allEnemies.find(function (enemy) {
+    if (gameControl.allEnemies.find(function (enemy) {
         return enemy.track.trackNumber === currentTrack && enemy.number != currentNumber
     })) {
         this.x = -303;
@@ -319,14 +332,14 @@ Enemy.prototype.restart = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
     
     // add enemy (below maxEnemies value)
-    this.number === 0 && allEnemies.length <= maxEnemies-1 ? this.addEnemy()  : false;
+    this.number === 0 && gameControl.allEnemies.length <= gameControl.maxEnemies-1 ? this.addEnemy()  : false;
     
     // instantiate collectibiles
-    if(this.number === 1  && collectibles.length === 0){        
-        if(player.score >= winningScore && !player.capabilities.includes('hasKey')){
-            collectibles.push(new Key())
+    if(this.number === 1  && gameControl.collectibles.length === 0){        
+        if(player.score >= gameControl.winningScore && !player.capabilities.includes('hasKey')){
+            gameControl.collectibles.push(new Key())
         }else{
-            player.health===1? collectibles.push(new Heart()):collectibles.push(new Gem())
+            player.health===1? gameControl.collectibles.push(new Heart()):gameControl.collectibles.push(new Gem())
         }
      }
      
@@ -339,7 +352,7 @@ Enemy.prototype.addEnemy = function(){
     let delay = Math.floor(Math.random() * (4500 - 1250 + 1)) + 1250
     setTimeout(() => {
       let enemy = new Enemy();
-        gameState === 'running'? allEnemies.push(enemy): false;
+      gameControl.gameState === 'running'? gameControl.allEnemies.push(enemy): false;
     }, delay);
 }
 
@@ -380,7 +393,7 @@ Player.prototype.update = function(dt){
     }
 
         // if player have no health game over
-    if(this.health <= 0 && gameState != 'gameOver'){
+    if(this.health <= 0 && gameControl.gameState != 'gameOver'){
         
         this.repositioning = true;
         gameManager.gameOver();
@@ -404,9 +417,9 @@ Player.prototype.update = function(dt){
     }
 
     // player collectible collision
-    if (this.repositioning === false && collectibles.length ){
-        if (this.x === collectibles[0].x && this.y === collectibles[0].y){
-             gameManager.evaluateCollectible(collectibles[0]);
+    if (this.repositioning === false && gameControl.collectibles.length ){
+        if (this.x === gameControl.collectibles[0].x && this.y === gameControl.collectibles[0].y){
+             gameManager.evaluateCollectible(gameControl.collectibles[0]);
 
             }
     }
@@ -437,7 +450,7 @@ Player.prototype.render = function(){
 
 Player.prototype.handleInput = function(keyCode){
 
-    if(gameState === 'running'){
+    if(gameControl.gameState === 'running'){
     switch (keyCode) {
         case 'up':
             //this.up(); 
@@ -457,6 +470,19 @@ Player.prototype.handleInput = function(keyCode){
         default:
             break;
     }
+}
+
+// reposition the player in the starting position
+Player.prototype.init = function(){
+    this.sprite = 'images/char-boy.png';
+    this.x = 202;
+    this.y = 400;
+    this.health = 3;             // this holds current player health level
+    this.speedfactor = 600;
+    this.repositioning = false;  // setting this to true disable collision detection
+    this.score = 0;
+    this.capabilities = [];
+    this.healthLevel = '❤❤❤'; // used just for display health level in the UI
 }
 
 }
@@ -557,9 +583,17 @@ const messageManager = new MessageManager();
 let sfx = new Soundfx();
 let player = new Player();
 
+global.gameControl = gameControl;
+global.player = player;
+//global.collectibles = collectibles;
+//global.gallEnemies = allEnemies;
+//global.level = level;
+global.messageManager = messageManager;
+
+
 
 // display the startup message
-if(firstLoad){
+if(gameControl.firstLoad){
     document.addEventListener("DOMContentLoaded", function(event) {
         messageManager.setMessage(['FROGGER','','Press Enter to start']);            
         });        
@@ -589,3 +623,8 @@ if(firstLoad){
         gameKeys[e.keyCode] ? gameManager.handleInput(gameKeys[e.keyCode]): false;
     });
 
+
+
+})(this);
+
+//console.log(Game.speedlevel);

@@ -96,10 +96,10 @@ var Engine = (function(global) {
      */
     function updateEntities(dt) {
         
-        collectibles.forEach(function(collectible) {
+        gameControl.collectibles.forEach(function(collectible) {
             collectible.update(dt);
         });
-        allEnemies.forEach(function(enemy) {
+        gameControl.allEnemies.forEach(function(enemy) {
             enemy.update(dt);
         });
         player.update(dt);
@@ -163,12 +163,12 @@ var Engine = (function(global) {
         /* Loop through all of the objects within the allEnemies array and call
          * the render function you have defined.
          */
-        collectibles.forEach(function(gem) {            
+        gameControl.collectibles.forEach(function(gem) {            
             gem.render();
             
         });
         
-        allEnemies.forEach(function(enemy) {
+        gameControl.allEnemies.forEach(function(enemy) {
             enemy.render();
         });
 
@@ -177,7 +177,7 @@ var Engine = (function(global) {
         ctx.font='20px Monospace';
         
         // print level, score and health 
-        ctx.fillText('Level: '+level + '  Score: '+player.score,0,30);
+        ctx.fillText('Level: '+gameControl.level + '  Score: '+player.score,0,30);
         ctx.fillText('Health:'+player.healthLevel ,370,30);
 
         messageManager.render();
