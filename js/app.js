@@ -93,7 +93,7 @@ const MessageManager = function(){
             gameControl.allEnemies.length = 0
             gameControl.collectibles.length = 0;
             myEnemy = new Enemy();console.log(myEnemy);
-            gameControl.gameState === 'gameOver'?(gameControl.level = 1,/*FIXME: player duplication here*/ player.init()):false; // Reinstantiate player after gamover
+            gameControl.gameState === 'gameOver'?(gameControl.level = 1, player.init()):false; // Reinstantiate player after gamover
             gameControl.gameState != 'levelUp'? messageManager.setMessage(['','','']):false; // Hide start and gameover messages
             gameControl.allEnemies.push(myEnemy);
             
